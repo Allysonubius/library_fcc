@@ -1,22 +1,42 @@
 'use strict';
 
 const express     = require('express');
-const bodyParser  = require('body-parser');
 const cors        = require('cors');
 require('dotenv').config();
 
 const apiRoutes         = require('./routes/api.js');
 const fccTestingRoutes  = require('./routes/fcctesting.js');
 const runner            = require('./test-runner');
-
+const mongoose 					= require('mongoose');
 const app = express();
+
+//connection to mongodb
+
+let dbUrl;
+if (process.env.NODE_ENV === "test") {
+  dbUrl = process.env.TEST_DB;
+} else {
+  dbUrl = process.env.DB;
+}
+
+mongoose.connect(dbUrl, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+  useFindAndModify: false,
+});
+const db = mongoose.connection;
+db.on("error", console.error.bind(console, "connection error:"));
+db.once("open", function () {
+  console.log("Successfully connected to MONGODB");
+});
 
 app.use('/public', express.static(process.cwd() + '/public'));
 
 app.use(cors({origin: '*'})); //USED FOR FCC TESTING PURPOSES ONLY!
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 //Index page (static HTML)
 app.route('/')
