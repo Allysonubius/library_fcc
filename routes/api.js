@@ -18,12 +18,12 @@ module.exports = function (app) {
 			try{
 				const Books = await Book.find({});
 				if(Books){
+				//response will be array of book objects
+				//json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
 					return res.status(200).json(Books)
 				}else{
 					return res.json({error:"Some error"})
 				}
-				//response will be array of book objects
-				//json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
 			}catch(err){
 				console.log(err)
 				return res.json({error:err.message})
@@ -35,10 +35,10 @@ module.exports = function (app) {
 			if(req.body.title){
 				let title = req.body.title;
 				const newBook = await Book.create({title});
+				//response will contain new book object including atleast _id and title
 				return res.status(200).json({title:newBook.title,_id:newBook._id})
 			}
 			return res.status(200).send('missing required field title')
-      //response will contain new book object including atleast _id and title
     })
     
     .delete(async function(req, res){
@@ -52,10 +52,14 @@ module.exports = function (app) {
 
   app.route('/api/books/:id')
     .get( async function (req, res){
-      let bookid = req.params.id;
-			let foundBook = await Book.findById(bookid).populate("comments");
-			return res.status(200).json(foundBook)
-      //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
+			try {
+				let bookid = req.params.id;
+				let foundBook = await Book.findById(bookid).populate("comments");
+				 //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
+				return res.status(200).json(foundBook)
+			} catch (error) {
+				return res.status(200).send('no book exists')
+			}
     })
     
     .post(async function(req, res){
