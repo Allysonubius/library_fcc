@@ -5,7 +5,7 @@
 *       -----[Keep the tests in the same order!]-----
 *       
 */
-// process.env.NODE_ENV === "test"
+process.env.NODE_ENV === "test" 
 const chaiHttp = require('chai-http');
 const chai = require('chai');
 const assert = chai.assert;
@@ -94,8 +94,9 @@ suite('Functional Tests', function() {
     suite('GET /api/books/[id] => book object with [id]', function(){
       
       test('Test GET /api/books/[id] with id not in db',  function(done){
+				const id = '41224d776a326fb40f000001';
 				chai.request(server)
-						.get('/api/books/ghf89993uu92344')
+						.get(`/api/books/${id}`)
 						.end((err,res)=>{
 							if(err) return done(err);
 							assert.equal(res.text,'no book exists')
