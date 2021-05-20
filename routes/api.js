@@ -43,8 +43,8 @@ module.exports = function (app) {
     
     .delete(async function(req, res){
       //if successful response will be 'complete delete successful'
-				await Book.remove({});
-				await Book.save();
+				await Book.deleteMany({});
+				// await Book.save();
 				return res.status(200).send('complete delete successful')
     });
 
@@ -52,14 +52,13 @@ module.exports = function (app) {
 
   app.route('/api/books/:id')
     .get( async function (req, res){
-			try {
 				let bookid = req.params.id;
 				let foundBook = await Book.findById(bookid).populate("comments");
-				 //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
+				if(foundBook){
+						 //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
 				return res.status(200).json(foundBook)
-			} catch (error) {
+				}
 				return res.status(200).send('no book exists')
-			}
     })
     
     .post(async function(req, res){
