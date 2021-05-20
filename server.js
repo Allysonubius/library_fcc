@@ -25,6 +25,7 @@ mongoose.connect(dbUrl, {
   useCreateIndex: true,
   useFindAndModify: false,
 });
+// mongoose.set('toJSON', { virtuals: true });
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", function () {

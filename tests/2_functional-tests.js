@@ -5,16 +5,19 @@
 *       -----[Keep the tests in the same order!]-----
 *       
 */
-
+process.env.NODE_ENV === "test"
 const chaiHttp = require('chai-http');
 const chai = require('chai');
 const assert = chai.assert;
 const server = require('../server');
+const Book = require('../model/Book');
 
 chai.use(chaiHttp);
 
 suite('Functional Tests', function() {
-
+	this.beforeEach(async()=>{
+		await Book.remove({});
+	})
   /*
   * ----[EXAMPLE TEST]----
   * Each test should completely test the response of the API end-point including response status code!
@@ -38,14 +41,33 @@ suite('Functional Tests', function() {
   suite('Routing tests', function() {
 
 
-    suite('POST /api/books with title => create book object/expect book object', function() {
+    suite.only('POST /api/books with title => create book object/expect book object', function() {
       
       test('Test POST /api/books with title', function(done) {
-        //done();
+				let book = new Book({title:'TEST_BOOK'});
+				chai.request(server)
+				.post('/api/books')
+				.send(book)
+				.end(function(err, res){
+					assert.equal(res.status, 200);
+					assert.isObject(res.body, 'response should be an object');
+					assert.property(res.body, 'title', 'Book should contain title');
+					assert.propertyVal(res.body, 'title', 'TEST_BOOK','Books in array should contain title');
+					assert.property(res.body, '_id', 'Books should contain _id');
+					// assert.propertyVal(res.body, '_id', `${book._id}`,'Books _id should be equal to book');
+					done();
+				});
       });
       
       test('Test POST /api/books with no title given', function(done) {
-        //done();
+				chai.request(server)
+				.post('/api/books')
+				.send({})
+				.end(function(err, res){
+					assert.equal(res.status, 200);
+					assert.equal(res.text, 'missing required field title');
+					done();
+				});
       });
       
     });

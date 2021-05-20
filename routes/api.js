@@ -25,33 +25,47 @@ module.exports = function (app) {
 				//response will be array of book objects
 				//json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
 			}catch(err){
-				consol.log(err)
+				console.log(err)
 				return res.json({error:err.message})
 			}
 
     })
     
-    .post(function (req, res){
-      let title = req.body.title;
+    .post(async function (req, res){
+			if(req.body.title){
+				let title = req.body.title;
+				const newBook = await Book.create({title});
+				return res.status(200).json({title:newBook.title,_id:newBook._id})
+			}
+			return res.status(200).send('missing required field title')
       //response will contain new book object including atleast _id and title
     })
     
-    .delete(function(req, res){
+    .delete(async function(req, res){
       //if successful response will be 'complete delete successful'
+			// let _id = req.body._id;
+			// const deletedBook = await Book.findByIdAndDelete(_id);
+			// return res.status(200).json({message:"Delete a book",deletedBook})
     });
 
 
 
   app.route('/api/books/:id')
-    .get(function (req, res){
+    .get( async function (req, res){
       let bookid = req.params.id;
+			let foundBook = await Book.findById(bookid).populate("comments");
+			return res.status(200).json(foundBook)
       //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
     })
     
-    .post(function(req, res){
+    .post(async function(req, res){
       let bookid = req.params.id;
       let comment = req.body.comment;
+			let foundBook = await Book.findById(bookid).populate("comments");
+			foundBook.comments.push(comment);
+			await foundBook.save()
       //json res format same as .get
+			return res.status(200).json(foundBook)
     })
     
     .delete(function(req, res){
