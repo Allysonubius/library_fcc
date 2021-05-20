@@ -43,9 +43,9 @@ module.exports = function (app) {
     
     .delete(async function(req, res){
       //if successful response will be 'complete delete successful'
-			// let _id = req.body._id;
-			// const deletedBook = await Book.findByIdAndDelete(_id);
-			// return res.status(200).json({message:"Delete a book",deletedBook})
+				await Book.remove({});
+				await Book.save();
+				return res.status(200).send('complete delete successful')
     });
 
 
@@ -63,18 +63,33 @@ module.exports = function (app) {
     })
     
     .post(async function(req, res){
-      let bookid = req.params.id;
-      let comment = req.body.comment;
-			let foundBook = await Book.findById(bookid).populate("comments");
-			foundBook.comments.push(comment);
-			await foundBook.save()
-      //json res format same as .get
-			return res.status(200).json(foundBook)
+		
+			if(req.body.comment &&req.body.comment !== ""){
+				let bookid = req.params.id;
+				let comment = req.body.comment;
+				let foundBook = await Book.findById(bookid)
+				if(foundBook){
+					foundBook.comments.push(comment);
+					await foundBook.save();
+					//json res format same as .get
+					return res.status(200).json(foundBook)
+				}else{
+					return res.status(200).send('no book exists')
+				}
+			
+			}else{
+				return res.status(200).send('missing required field comment')
+			}
     })
     
-    .delete(function(req, res){
+    .delete(async function(req, res){
       let bookid = req.params.id;
+			const deletedBook = await Book.findByIdAndDelete(bookid);
+			if(deletedBook){
+				return res.status(200).send('delete successful')
       //if successful response will be 'delete successful'
+			}
+			return res.status(200).send('no book exists')
     });
   
 };
